@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>IES-Chats</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="Amazon.css" />
+    <script src="Scripts/jquery-1.10.2.min.js"></script>
+    <script src="Scripts/jquery.signalR-2.0.2.min.js"></script>
+    <script src="/signalr/hubs"></script>
+
+    <script type="text/javascript">
+    var currentChatRoom = "Introduce Yourself";
+
+    function addChatRoomToList(chatroom) {
+        $("#chatlist").append($("<option value = " + chatroom + ">" + chatroom + "</option>"));
+    }
+
+    function addMessageToWindow(message) {
+        $("#chatwindow").val($("#chatwindow").val() + message + "\n");
+    }
+
+    function clearChatRoom(chatroom) {
+        $("#chatwindow").val("");
+        addMessageToWindow("You are in online start chating with your group..." + "\n");
+    }
+
+    $(function () {
+        var chat = $.connection.myHub;
+
+        chat.client.addChatRoom = function (chatroom) {
+            addChatRoomToList(chatroom);
+            if (chatroom == currentChatRoom) {
+                $("#chatlist").val(currentChatRoom);
+                addMessageToWindow("Have fun...:)")
+
+            }
+        }
+
+        chat.client.addMessage = function (room, message) {
+            if (room == currentChatRoom) {
+                addMessageToWindow(message);
+            }
+        }
+
+        $.connection.hub.start().done(function () {
+            $("#chatwindow").val("You are in online start chating with your group..." + "\n");
+            chat.server.join("Introduce Yourself");
+
+            $("#sendmessage").click(function () {
+                chat.server.send(currentChatRoom, $("#messagetext").val());
+                $("#messagetext").val("");
+
+            })
+
+            $("#creategroup").click(function () {
+                chat.server.createChatRoom($("#createtextbox").val());
+                $("#createtextbox").val("");
+            });
+
+            $("#chatlist").change(function () {
+                currentChatRoom = $("#chatlist option:selected").val();
+                chat.server.join(currentChatRoom);
+                clearChatRoom(currentChatRoom);
+            });
+        });
+
+    });
+
+
+
+    </script>
+
+    <style type="text/css">
+        #chatlist {
+            width: 100px;
+            height: 300px;
+            float: right;
+        }
+
+        #chatwindow {
+            width: 400px;
+            height: 300px;
+        }
+
+        #messagetext {
+            width: 230px;
+        }
+
+        #co{
+            margin-top:40px;
+        }
+
+        #boo{
+            margin-top:20px;
+            margin-left:30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation_bar">
+        <table id="table">
+            <tbody>
+                <tr>
+                    <td class="col-lg-8 col-md-4">
+                        <p><span id="header-style">Interactive</span><span id="remaining-name">ES</span></p>
+                    </td>
+                    <td id="empty"></td>
+                    <td>
+                        <ul>
+                            <li><a href="SHome.aspx">Home</a></li>
+                            <li><a href="AboutIES.aspx">About IES</a></li>
+                            <li><a href="SProfile.aspx">Profile</a></li>
+
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="boo">
+        <table>
+            <tr>
+                <td class="col-xs-6 col-md-4">
+                    <label>Create a new chat group</label>
+                </td>
+                <td class="col-xs-6 col-md-4">
+                    <input type="text" id="createtextbox" class="form-control" />
+                </td>
+                <td class="col-xs-6 col-md-4">
+                    <input type="button" id="creategroup" value="Create Group">
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table>
+        <tr>
+            <td class="col-xs-6 col-md-4">
+                <select id="chatlist" size="2" class="form-control"></select>
+            </td>
+            <td>
+                <br />
+                <textarea id="chatwindow" class="form-control"></textarea>
+            </td>
+        </tr>
+    </table>
+    <div id="co">
+        <table>
+            <tr>
+                <td>
+                    <input type="text" id="messagetext" class="form-control" placeholder="Message" />
+                </td>
+                <td class="col-xs-6 col-md-4">
+                    <input type="button" id="sendmessage" value="Send" class="btn btn-default" />
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+</body>
+</html>
